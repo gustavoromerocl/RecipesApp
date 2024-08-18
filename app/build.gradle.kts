@@ -50,7 +50,12 @@ android {
 }
 
 dependencies {
-
+    implementation(libs.material3)
+    implementation(libs.ui)
+    implementation(libs.ui.tooling.preview)
+    implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.foundation)
+    implementation(libs.androidx.activity.compose.v172)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
