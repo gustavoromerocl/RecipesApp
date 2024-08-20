@@ -1,11 +1,7 @@
 package com.example.recipesapp.views
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -23,14 +19,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.recipesapp.data.UserRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
-fun LoginView() {
+fun LoginView(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -42,6 +38,10 @@ fun LoginView() {
             )
         },
         content = { paddingValues ->
+            var email by remember { mutableStateOf("") }
+            var password by remember { mutableStateOf("") }
+            var errorMessage by remember { mutableStateOf<String?>(null) }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -58,9 +58,6 @@ fun LoginView() {
                     color = Color.Black,
                     modifier = Modifier.padding(bottom = 32.dp)
                 )
-
-                var email by remember { mutableStateOf("") }
-                var password by remember { mutableStateOf("") }
 
                 OutlinedTextField(
                     value = email,
@@ -91,8 +88,23 @@ fun LoginView() {
                     singleLine = true
                 )
 
+                errorMessage?.let { error ->
+                    Text(
+                        text = error,
+                        color = Color.Red,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                }
+
                 Button(
-                    onClick = { /* TODO: Lógica de autenticación */ },
+                    onClick = {
+                        val isValid = UserRepository.validateUser(email, password)
+                        if (isValid) {
+                            navController.navigate("home")
+                        } else {
+                            errorMessage = "Invalid email or password."
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
@@ -104,6 +116,24 @@ fun LoginView() {
                 ) {
                     Text(text = "Login", fontSize = 18.sp)
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Don't have an account? Register here.",
+                    color = Color.Blue,
+                    modifier = Modifier.clickable {
+                        navController.navigate("register")
+                    }
+                )
+
+                Text(
+                    text = "Did you forget your password?.",
+                    color = Color.Blue,
+                    modifier = Modifier.clickable {
+                        navController.navigate("passwordRecovery")
+                    }
+                )
             }
         }
     )
