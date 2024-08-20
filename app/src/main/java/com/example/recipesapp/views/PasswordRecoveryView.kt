@@ -1,20 +1,9 @@
 package com.example.recipesapp.views
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,18 +11,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import java.util.regex.Pattern
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
-fun PasswordRecoveryView() {
+fun PasswordRecoveryView(navController: NavController) {
+    var email by remember { mutableStateOf("") }
+    var showDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Recover Password") },
+                title = { Text("Login") },
                 colors = topAppBarColors(
                     containerColor = Color.Magenta,
                     titleContentColor = Color.White
@@ -58,8 +51,6 @@ fun PasswordRecoveryView() {
                     modifier = Modifier.padding(bottom = 32.dp)
                 )
 
-                var email by remember { mutableStateOf("") }
-
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -74,8 +65,22 @@ fun PasswordRecoveryView() {
                     singleLine = true
                 )
 
+                errorMessage?.let { error ->
+                    Text(
+                        text = error,
+                        color = Color.Red,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                }
+
                 Button(
-                    onClick = { /* TODO: Lógica de recuperación de contraseña */ },
+                    onClick = {
+                        if (isValidEmail(email)) {
+                            showDialog = true
+                        } else {
+                            errorMessage = "Please enter a valid email address."
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
@@ -90,4 +95,30 @@ fun PasswordRecoveryView() {
             }
         }
     )
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Email Sent") },
+            text = { Text("A recovery email has been sent to $email.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        navController.popBackStack()
+                    }
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+}
+
+fun isValidEmail(email: String): Boolean {
+    val emailPattern = Pattern.compile(
+        "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$",
+        Pattern.CASE_INSENSITIVE
+    )
+    return emailPattern.matcher(email).find()
 }
