@@ -1,7 +1,9 @@
 package com.example.recipesapp.views
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,14 +25,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.recipesapp.data.UserRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
-fun RegisterView() {
+fun RegisterView(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -42,6 +44,12 @@ fun RegisterView() {
             )
         },
         content = { paddingValues ->
+            var username by remember { mutableStateOf("") }
+            var email by remember { mutableStateOf("") }
+            var password by remember { mutableStateOf("") }
+            var confirmPassword by remember { mutableStateOf("") }
+            var errorMessage by remember { mutableStateOf<String?>(null) }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -58,11 +66,6 @@ fun RegisterView() {
                     color = Color.Black,
                     modifier = Modifier.padding(bottom = 32.dp)
                 )
-
-                var username by remember { mutableStateOf("") }
-                var email by remember { mutableStateOf("") }
-                var password by remember { mutableStateOf("") }
-                var confirmPassword by remember { mutableStateOf("") }
 
                 OutlinedTextField(
                     value = username,
@@ -112,7 +115,7 @@ fun RegisterView() {
                     label = { Text("Confirm Password") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 24.dp),
+                        .padding(bottom = 16.dp),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Done
@@ -121,8 +124,29 @@ fun RegisterView() {
                     singleLine = true
                 )
 
+                errorMessage?.let { error ->
+                    Text(
+                        text = error,
+                        color = Color.Red,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                }
+
                 Button(
-                    onClick = { /* TODO: Lógica de registro */ },
+                    onClick = {
+                        errorMessage = when {
+                            username.isBlank() || email.isBlank() || password.isBlank() -> "All fields are required."
+                            password != confirmPassword -> "Passwords do not match."
+                            UserRepository.getAllUsers().any { it.username == username } -> "Username already exists."
+                            UserRepository.getAllUsers().any { it.email == email } -> "Email already registered."
+                            else -> null
+                        }
+
+                        if (errorMessage == null) {
+                            UserRepository.addUser(username, email, password)
+                            navController.navigate("login")
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
@@ -134,6 +158,16 @@ fun RegisterView() {
                 ) {
                     Text(text = "Register", fontSize = 18.sp)
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Do you already have an account? Log in here.",
+                    color = Color.Blue,
+                    modifier = Modifier.clickable {
+                        navController.navigate("login")
+                    }
+                )
             }
         }
     )
