@@ -123,7 +123,7 @@ fun LoginView(navController: NavController) {
                     text = "Don't have an account? Register here.",
                     color = Color.Blue,
                     modifier = Modifier.clickable {
-                        navController.navigate("register")
+                        navController.navigate("signIn")
                     }
                 )
 
