@@ -29,27 +29,34 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.recipesapp.data.UserRepository
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterView(navController: NavController) {
+    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Register") },
+                title = {
+                    Text(text = "Register")
+                },
                 colors = topAppBarColors(
-                    containerColor = Color.Magenta,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = Color.White
                 )
             )
         },
         content = { paddingValues ->
-            var username by remember { mutableStateOf("") }
-            var email by remember { mutableStateOf("") }
-            var password by remember { mutableStateOf("") }
-            var confirmPassword by remember { mutableStateOf("") }
-            var errorMessage by remember { mutableStateOf<String?>(null) }
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -61,9 +68,10 @@ fun RegisterView(navController: NavController) {
                 Text(
                     text = "Create Account",
                     style = androidx.compose.material3.MaterialTheme.typography.headlineMedium.copy(
-                        fontSize = 28.sp
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold
                     ),
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(bottom = 32.dp)
                 )
 
@@ -127,43 +135,52 @@ fun RegisterView(navController: NavController) {
                 errorMessage?.let { error ->
                     Text(
                         text = error,
-                        color = Color.Red,
+                        color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }
 
-                Button(
-                    onClick = {
-                        errorMessage = when {
-                            username.isBlank() || email.isBlank() || password.isBlank() -> "All fields are required."
-                            password != confirmPassword -> "Passwords do not match."
-                            UserRepository.getAllUsers().any { it.username == username } -> "Username already exists."
-                            UserRepository.getAllUsers().any { it.email == email } -> "Email already registered."
-                            else -> null
-                        }
-
-                        if (errorMessage == null) {
-                            UserRepository.addUser(username, email, password)
-                            navController.navigate("login")
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Magenta,
-                        contentColor = Color.White
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
-                ) {
-                    Text(text = "Register", fontSize = 18.sp)
+                } else {
+                    Button(
+                        onClick = {
+                            isLoading = true
+                            errorMessage = when {
+                                username.isBlank() || email.isBlank() || password.isBlank() -> "All fields are required."
+                                password != confirmPassword -> "Passwords do not match."
+                                UserRepository.getAllUsers().any { it.username == username } -> "Username already exists."
+                                UserRepository.getAllUsers().any { it.email == email } -> "Email already registered."
+                                else -> null
+                            }
+
+                            if (errorMessage == null) {
+                                UserRepository.addUser(username, email, password)
+                                navController.navigate("login")
+                            }
+                            isLoading = false
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text(text = "Register", fontSize = 18.sp)
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
                     text = "Do you already have an account? Log in here.",
-                    color = Color.Blue,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable {
                         navController.navigate("login")
                     }
