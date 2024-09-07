@@ -41,7 +41,7 @@ fun LoginView(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Login") },
+                title = { Text("") },
                 colors = topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = Color.White
@@ -67,7 +67,7 @@ fun LoginView(navController: NavController) {
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Email") },
+                    label = { Text("Correo") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
@@ -81,7 +81,7 @@ fun LoginView(navController: NavController) {
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text("Contraseña") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 24.dp),
@@ -114,7 +114,7 @@ fun LoginView(navController: NavController) {
                             if (isValid) {
                                 navController.navigate("home")
                             } else {
-                                errorMessage = "Invalid email or password."
+                                errorMessage = "Correo o contraseña inválidos."
                             }
                             isLoading = false
                         },
@@ -127,14 +127,14 @@ fun LoginView(navController: NavController) {
                             contentColor = Color.White
                         )
                     ) {
-                        Text(text = "Login", fontSize = 18.sp)
+                        Text(text = "Iniciar sesión", fontSize = 18.sp)
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Don't have an account? Register here.",
+                    text = "¿No tienes una cuenta? Registrate aquí.",
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .padding(bottom = 8.dp)
@@ -144,7 +144,7 @@ fun LoginView(navController: NavController) {
                 )
 
                 Text(
-                    text = "Forgot your password?",
+                    text = "¿Olvidaste tu contraseña?",
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable {
                         navController.navigate("passwordRecovery")

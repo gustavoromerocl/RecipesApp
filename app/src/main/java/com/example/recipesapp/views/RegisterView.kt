@@ -48,7 +48,7 @@ fun RegisterView(navController: NavController) {
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Register")
+                    Text(text = "Registro")
                 },
                 colors = topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -66,7 +66,7 @@ fun RegisterView(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Create Account",
+                    text = "Crear cuenta",
                     style = androidx.compose.material3.MaterialTheme.typography.headlineMedium.copy(
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold
@@ -78,7 +78,7 @@ fun RegisterView(navController: NavController) {
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
-                    label = { Text("Username") },
+                    label = { Text("Nombre de usuario") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
@@ -91,7 +91,7 @@ fun RegisterView(navController: NavController) {
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Email") },
+                    label = { Text("Correo electrónico") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
@@ -105,7 +105,7 @@ fun RegisterView(navController: NavController) {
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text("Contraseña") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
@@ -120,7 +120,7 @@ fun RegisterView(navController: NavController) {
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
-                    label = { Text("Confirm Password") },
+                    label = { Text("Confirmar contraseña") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
@@ -150,10 +150,10 @@ fun RegisterView(navController: NavController) {
                         onClick = {
                             isLoading = true
                             errorMessage = when {
-                                username.isBlank() || email.isBlank() || password.isBlank() -> "All fields are required."
-                                password != confirmPassword -> "Passwords do not match."
-                                UserRepository.getAllUsers().any { it.username == username } -> "Username already exists."
-                                UserRepository.getAllUsers().any { it.email == email } -> "Email already registered."
+                                username.isBlank() || email.isBlank() || password.isBlank() -> "Todos los campos son requeridos."
+                                password != confirmPassword -> "Las contraseñas no coinciden."
+                                UserRepository.getAllUsers().any { it.username == username } -> "El nombre de usuario ya existe."
+                                UserRepository.getAllUsers().any { it.email == email } -> "El correo electrónico ya existe"
                                 else -> null
                             }
 
@@ -172,14 +172,14 @@ fun RegisterView(navController: NavController) {
                             contentColor = Color.White
                         )
                     ) {
-                        Text(text = "Register", fontSize = 18.sp)
+                        Text(text = "Registrarse", fontSize = 18.sp)
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Do you already have an account? Log in here.",
+                    text = "¿Ya tienes una cuenta? Inicia sesión aquí.",
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable {
                         navController.navigate("login")
