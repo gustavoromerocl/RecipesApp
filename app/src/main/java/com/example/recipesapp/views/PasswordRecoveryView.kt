@@ -26,9 +26,9 @@ fun PasswordRecoveryView(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Login") },
+                title = { Text("Password Recovery") },
                 colors = topAppBarColors(
-                    containerColor = Color.Magenta,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = Color.White
                 )
             )
@@ -43,11 +43,11 @@ fun PasswordRecoveryView(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Password Recovery",
-                    style = androidx.compose.material3.MaterialTheme.typography.headlineMedium.copy(
-                        fontSize = 28.sp
+                    text = "Recover Your Password",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontSize = 28.sp,
+                        color = MaterialTheme.colorScheme.onBackground
                     ),
-                    color = Color.Black,
                     modifier = Modifier.padding(bottom = 32.dp)
                 )
 
@@ -62,13 +62,14 @@ fun PasswordRecoveryView(navController: NavController) {
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Done
                     ),
-                    singleLine = true
+                    singleLine = true,
+                    isError = errorMessage != null
                 )
 
                 errorMessage?.let { error ->
                     Text(
                         text = error,
-                        color = Color.Red,
+                        color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }
@@ -77,6 +78,7 @@ fun PasswordRecoveryView(navController: NavController) {
                     onClick = {
                         if (isValidEmail(email)) {
                             showDialog = true
+                            errorMessage = null
                         } else {
                             errorMessage = "Please enter a valid email address."
                         }
@@ -86,7 +88,7 @@ fun PasswordRecoveryView(navController: NavController) {
                         .height(50.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Magenta,
+                        containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = Color.White
                     )
                 ) {
