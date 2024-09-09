@@ -26,7 +26,7 @@ fun PasswordRecoveryView(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Password Recovery") },
+                title = { Text("Recuperar contraseña") },
                 colors = topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = Color.White
@@ -43,7 +43,7 @@ fun PasswordRecoveryView(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Recover Your Password",
+                    text = "Recupera tu contraseña",
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontSize = 28.sp,
                         color = MaterialTheme.colorScheme.onBackground
@@ -54,7 +54,7 @@ fun PasswordRecoveryView(navController: NavController) {
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Email") },
+                    label = { Text("Correo electrónico") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 24.dp),
@@ -80,7 +80,7 @@ fun PasswordRecoveryView(navController: NavController) {
                             showDialog = true
                             errorMessage = null
                         } else {
-                            errorMessage = "Please enter a valid email address."
+                            errorMessage = "Por favor ingrese un correo válido."
                         }
                     },
                     modifier = Modifier
@@ -92,7 +92,7 @@ fun PasswordRecoveryView(navController: NavController) {
                         contentColor = Color.White
                     )
                 ) {
-                    Text(text = "Recover Password", fontSize = 18.sp)
+                    Text(text = "Recuperar contraseña", fontSize = 18.sp)
                 }
             }
         }
@@ -101,8 +101,8 @@ fun PasswordRecoveryView(navController: NavController) {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Email Sent") },
-            text = { Text("A recovery email has been sent to $email.") },
+            title = { Text("Correo enviado") },
+            text = { Text("Si tienes una cuenta registrada recibirás un correo electrónico de recuperación") },
             confirmButton = {
                 TextButton(
                     onClick = {

@@ -1,6 +1,7 @@
 [versions]
 activityComposeVersion = "1.7.2"
 agp = "8.5.1"
+coilCompose = "2.0.0"
 foundation = "1.6.8"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
@@ -11,6 +12,7 @@ lifecycleRuntimeKtx = "2.8.4"
 activityCompose = "1.9.1"
 composeBom = "2024.04.01"
 material3 = "1.2.1"
+materialIconsExtended = "1.7.0"
 navigationCompose = "2.7.7"
 runtimeLivedata = "1.6.8"
 ui = "1.6.8"
@@ -21,8 +23,10 @@ navigationCommonKtx = "2.7.7"
 androidx-activity-compose-v172 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
+androidx-material-icons-extended-v170 = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtimeLivedata" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
