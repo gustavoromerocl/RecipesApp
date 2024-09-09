@@ -6,10 +6,10 @@ import com.example.recipesapp.models.Category
 
 object CategoryRepository {
     private val categories = mutableListOf(
-        Category(1, "Appetizers", Icons.Filled.Fastfood),
-        Category(2, "Main Courses", Icons.Filled.Restaurant),
-        Category(3, "Desserts", Icons.Filled.Cake),
-        Category(4, "Beverages", Icons.Filled.LocalBar)
+        Category(1, "Aperitivos", Icons.Filled.Fastfood),
+        Category(2, "Platos Principales", Icons.Filled.Restaurant),
+        Category(3, "Postres", Icons.Filled.Cake),
+        Category(4, "Bebestibles", Icons.Filled.LocalBar)
     )
 
     fun getAllCategories(): List<Category> {
