@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("com.android.application")
+    //id("com.android.application")
     id("com.google.gms.google-services")
 }
 
@@ -78,4 +78,5 @@ dependencies {
     implementation(libs.androidx.material.icons.extended.v170)
     implementation(libs.coil.compose)
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore.ktx)
 }
