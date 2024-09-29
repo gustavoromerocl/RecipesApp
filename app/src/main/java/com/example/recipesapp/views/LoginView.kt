@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.recipesapp.data.UserRepository
 import com.example.recipesapp.R
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +38,7 @@ fun LoginView(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope() // Coroutine scope para manejar funciones suspendidas
 
     Scaffold(
         topBar = {
@@ -62,7 +64,6 @@ fun LoginView(navController: NavController) {
                     contentDescription = "App Logo",
                     modifier = Modifier.size(150.dp)
                 )
-
 
                 OutlinedTextField(
                     value = email,
@@ -109,14 +110,16 @@ fun LoginView(navController: NavController) {
                 } else {
                     Button(
                         onClick = {
-                            isLoading = true
-                            val isValid = UserRepository.validateUser(email, password)
-                            if (isValid) {
-                                navController.navigate("home")
-                            } else {
-                                errorMessage = "Correo o contraseña inválidos."
+                            coroutineScope.launch {
+                                isLoading = true
+                                val isValid = UserRepository.validateUser(email, password)
+                                if (isValid) {
+                                    navController.navigate("home")
+                                } else {
+                                    errorMessage = "Correo o contraseña inválidos."
+                                }
+                                isLoading = false
                             }
-                            isLoading = false
                         },
                         modifier = Modifier
                             .fillMaxWidth()

@@ -29,13 +29,25 @@ import com.example.recipesapp.models.Recipe
 @Composable
 fun HomeView(navController: NavController) {
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
-    val categories = CategoryRepository.getAllCategories()
+    var categories by remember { mutableStateOf<List<Category>>(emptyList()) } // State para las categorías
+    var featuredRecipes by remember { mutableStateOf<List<Recipe>>(emptyList()) } // State para las recetas destacadas
+    var displayedRecipes by remember { mutableStateOf<List<Recipe>>(emptyList()) } // State para las recetas mostradas
 
-    // Cargar todas las recetas por defecto
-    val featuredRecipes = RecipeRepository.getAllRecipes().sortedByDescending { it.getAverageRating() }
+    // Usamos LaunchedEffect para cargar categorías y recetas
+    LaunchedEffect(Unit) {
+        categories = CategoryRepository.getAllCategories()
+        featuredRecipes = RecipeRepository.getAllRecipes().sortedByDescending { it.getAverageRating() }
+        displayedRecipes = featuredRecipes // Inicialmente mostrar todas las recetas ordenadas por calificación
+    }
 
-    // Inicializar las recetas mostradas con la categoría destacada (todas las recetas ordenadas por calificación)
-    var displayedRecipes by remember { mutableStateOf(featuredRecipes) }
+    // Si cambia la categoría seleccionada, cargar las recetas correspondientes
+    LaunchedEffect(selectedCategory) {
+        if (selectedCategory == null) {
+            displayedRecipes = featuredRecipes // Mostrar recetas destacadas si no hay categoría seleccionada
+        } else {
+            displayedRecipes = RecipeRepository.getRecipesByCategory(selectedCategory!!.id)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -65,21 +77,19 @@ fun HomeView(navController: NavController) {
                             category = Category(0, "Destacado", Icons.Filled.Star),
                             isSelected = selectedCategory?.id == 0,
                             onClick = {
-                                selectedCategory = null // Ninguna categoría seleccionada
-                                displayedRecipes = featuredRecipes // Mostrar todas las recetas ordenadas por calificación
+                                selectedCategory = null // Establecer a null para mostrar recetas destacadas
                             }
                         )
                     }
 
-                    // Mostrar las categorías disponibles
+                    // Mostrar las categorías disponibles cuando se carguen
                     items(categories.size) { index ->
                         val category = categories[index]
                         CategoryItem(
                             category = category,
                             isSelected = selectedCategory?.id == category.id,
                             onClick = {
-                                selectedCategory = category
-                                displayedRecipes = RecipeRepository.getRecipesByCategory(category.id)
+                                selectedCategory = category // Actualizar la categoría seleccionada
                             }
                         )
                     }
@@ -108,7 +118,7 @@ fun CategoryItem(category: Category, isSelected: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .clickable(onClick = onClick)
             .padding(4.dp),
-        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer, // Color más claro cuando no está seleccionado
+        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
         shape = RoundedCornerShape(8.dp)
     ) {
         Row(
@@ -130,6 +140,7 @@ fun CategoryItem(category: Category, isSelected: Boolean, onClick: () -> Unit) {
     }
 }
 
+
 @Composable
 fun RecipeItem(recipe: Recipe) {
     Card(
@@ -137,7 +148,7 @@ fun RecipeItem(recipe: Recipe) {
             .fillMaxWidth()
             .padding(8.dp),
         shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant) // Color diferenciado para recetas
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -165,7 +176,11 @@ fun RecipeItem(recipe: Recipe) {
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = recipe.description, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
+                Text(
+                    text = recipe.description,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
             }
 
             // Calificación de la receta en la esquina superior derecha
@@ -181,3 +196,4 @@ fun RecipeItem(recipe: Recipe) {
         }
     }
 }
+
