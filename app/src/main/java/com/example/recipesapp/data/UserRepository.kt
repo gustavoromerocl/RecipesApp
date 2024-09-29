@@ -1,25 +1,47 @@
 package com.example.recipesapp.data
 
 import com.example.recipesapp.models.User
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 object UserRepository {
-    private val users = mutableListOf(
-        User("user1", "user1@example.com", "password1"),
-        User("user2", "user2@example.com", "password2"),
-        User("user3", "user3@example.com", "password3"),
-        User("user4", "user4@example.com", "password4"),
-        User("user5", "user5@example.com", "password5")
-    )
 
-    fun addUser(username: String, email: String, password: String) {
-        users.add(User(username, email, password))
+    private val firestore = FirebaseFirestore.getInstance()
+    private val userCollection = firestore.collection("users")
+
+    // Agregar un usuario a Firestore
+    suspend fun addUser(username: String, email: String, password: String) {
+        val user = User(username, email, password)
+        val data = hashMapOf(
+            "username" to user.username,
+            "email" to user.email,
+            "password" to user.password
+        )
+        userCollection.add(data).await() // Agregamos el usuario a Firestore
     }
 
-    fun validateUser(email: String, password: String): Boolean {
-        return users.any { it.email == email && it.password == password }
+    // Validar usuario (email y password) en Firestore
+    suspend fun validateUser(email: String, password: String): Boolean {
+        return try {
+            val snapshot = userCollection.whereEqualTo("email", email).whereEqualTo("password", password).get().await()
+            snapshot.documents.isNotEmpty() // Si hay un documento, significa que el usuario es válido
+        } catch (e: Exception) {
+            false // Si hay un error, devolvemos false
+        }
     }
 
-    fun getAllUsers(): List<User> {
-        return users
+    // Obtener todos los usuarios de Firestore
+    suspend fun getAllUsers(): List<User> {
+        return try {
+            val snapshot = userCollection.get().await()
+            snapshot.documents.map { document ->
+                val username = document.getString("username") ?: ""
+                val email = document.getString("email") ?: ""
+                val password = document.getString("password") ?: ""
+                User(username, email, password)
+            }
+        } catch (e: Exception) {
+            emptyList() // Si hay un error, devolvemos una lista vacía
+        }
     }
 }
