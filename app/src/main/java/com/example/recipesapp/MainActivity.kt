@@ -4,37 +4,29 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
+import com.example.recipesapp.data.CategoryRepository
 import com.example.navegacion.navigation.NavManager
+import com.example.recipesapp.data.RecipeRepository
 import com.example.recipesapp.ui.theme.RecipesAppTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Poblar las entidades por defecto al iniciar la app
+        lifecycleScope.launch {
+            CategoryRepository.insertDefaultCategories()
+            RecipeRepository.insertDefaultRecipes()
+        }
+
+
         setContent {
             RecipesAppTheme {
                 NavManager()
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    RecipesAppTheme {
-        Greeting("Android")
     }
 }
