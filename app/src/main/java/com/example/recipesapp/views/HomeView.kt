@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,6 +25,7 @@ import com.example.recipesapp.data.CategoryRepository
 import com.example.recipesapp.data.RecipeRepository
 import com.example.recipesapp.models.Category
 import com.example.recipesapp.models.Recipe
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +34,10 @@ fun HomeView(navController: NavController) {
     var categories by remember { mutableStateOf<List<Category>>(emptyList()) } // State para las categorías
     var featuredRecipes by remember { mutableStateOf<List<Recipe>>(emptyList()) } // State para las recetas destacadas
     var displayedRecipes by remember { mutableStateOf<List<Recipe>>(emptyList()) } // State para las recetas mostradas
+
+    // DrawerState para controlar el estado del Drawer
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
     // Usamos LaunchedEffect para cargar categorías y recetas
     LaunchedEffect(Unit) {
@@ -49,68 +55,114 @@ fun HomeView(navController: NavController) {
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Home") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White
-                )
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp)
-            ) {
-                // LazyRow para mostrar las categorías
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    item {
-                        // Agregar la categoría destacada (todas las recetas)
-                        CategoryItem(
-                            category = Category(0, "Destacado", Icons.Filled.Star),
-                            isSelected = selectedCategory?.id == 0,
-                            onClick = {
-                                selectedCategory = null // Establecer a null para mostrar recetas destacadas
+    // Contenido del Drawer
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Menú",
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                    HorizontalDivider()
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Perfil",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier
+                            .clickable {
+                                scope.launch {
+                                    drawerState.close() // Cerrar el drawer
+                                    navController.navigate("editProfile") // Navegar a la vista de edición de perfil
+                                }
                             }
-                        )
-                    }
+                            .padding(16.dp)
+                    )
 
-                    // Mostrar las categorías disponibles cuando se carguen
-                    items(categories.size) { index ->
-                        val category = categories[index]
-                        CategoryItem(
-                            category = category,
-                            isSelected = selectedCategory?.id == category.id,
-                            onClick = {
-                                selectedCategory = category // Actualizar la categoría seleccionada
-                            }
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // LazyColumn para mostrar las recetas
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(displayedRecipes.size) { index ->
-                        val recipe = displayedRecipes[index]
-                        RecipeItem(recipe = recipe)
-                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
+        },
+        content = {
+            // Contenido principal de la HomeView
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text("Home") },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                scope.launch {
+                                    drawerState.open() // Abrir el drawer al hacer clic en el ícono de menú
+                                }
+                            }) {
+                                Icon(Icons.Default.Menu, contentDescription = "Menú")
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            titleContentColor = Color.White
+                        )
+                    )
+                },
+                content = { paddingValues ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .padding(16.dp)
+                    ) {
+                        // LazyRow para mostrar las categorías
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            item {
+                                // Agregar la categoría destacada (todas las recetas)
+                                CategoryItem(
+                                    category = Category(0, "Destacado", Icons.Filled.Star),
+                                    isSelected = selectedCategory?.id == 0,
+                                    onClick = {
+                                        selectedCategory = null // Establecer a null para mostrar recetas destacadas
+                                    }
+                                )
+                            }
+
+                            // Mostrar las categorías disponibles cuando se carguen
+                            items(categories.size) { index ->
+                                val category = categories[index]
+                                CategoryItem(
+                                    category = category,
+                                    isSelected = selectedCategory?.id == category.id,
+                                    onClick = {
+                                        selectedCategory = category // Actualizar la categoría seleccionada
+                                    }
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // LazyColumn para mostrar las recetas
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(displayedRecipes.size) { index ->
+                                val recipe = displayedRecipes[index]
+                                RecipeItem(recipe = recipe)
+                            }
+                        }
+                    }
+                }
+            )
         }
     )
 }
+
 
 @Composable
 fun CategoryItem(category: Category, isSelected: Boolean, onClick: () -> Unit) {
