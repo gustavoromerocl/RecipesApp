@@ -1,5 +1,6 @@
 package com.example.recipesapp.views
 
+import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -20,9 +21,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileView(navController: NavController, userEmail: String) {
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf(userEmail) }
+fun EditProfileView(navController: NavController, usernameFromSession: String, emailFromSession: String) {
+    var username by remember { mutableStateOf(usernameFromSession) }
+    var email by remember { mutableStateOf(emailFromSession) }
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
