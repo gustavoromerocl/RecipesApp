@@ -61,4 +61,23 @@ object UserRepository {
         }
     }
 
+    // Obtener un usuario por su email
+    suspend fun getUserByEmail(email: String): User? {
+        return try {
+            val snapshot = userCollection.whereEqualTo("email", email).get().await()
+            if (snapshot.documents.isNotEmpty()) {
+                val document = snapshot.documents[0]
+                val username = document.getString("username") ?: ""
+                val email = document.getString("email") ?: ""
+                val password = document.getString("password") ?: ""
+                User(username, email, password) // Devuelve el usuario encontrado
+            } else {
+                null // Si no se encuentra, devuelve null
+            }
+        } catch (e: Exception) {
+            null // Si hay un error, devuelve null
+        }
+    }
+
+
 }
