@@ -44,4 +44,21 @@ object UserRepository {
             emptyList() // Si hay un error, devolvemos una lista vacía
         }
     }
+
+    // Actualizar un usuario en Firestore
+    suspend fun updateUser(email: String, username: String, newPassword: String) {
+        val userSnapshot = userCollection.whereEqualTo("email", email).get().await()
+
+        if (!userSnapshot.isEmpty) {
+            val userDoc = userSnapshot.documents[0].reference
+            val updates = hashMapOf(
+                "username" to username
+            )
+            if (newPassword.isNotEmpty()) {
+                updates["password"] = newPassword
+            }
+            userDoc.update(updates as Map<String, Any>).await()
+        }
+    }
+
 }
