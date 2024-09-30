@@ -58,7 +58,7 @@ class MyWidgetProvider : AppWidgetProvider() {
             val pendingIntent = PendingIntent.getActivity(
                 context,
                 0,
-                intent,s
+                intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
