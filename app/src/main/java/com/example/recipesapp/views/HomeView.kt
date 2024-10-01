@@ -1,11 +1,13 @@
 package com.example.recipesapp.views
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,83 +26,144 @@ import com.example.recipesapp.data.CategoryRepository
 import com.example.recipesapp.data.RecipeRepository
 import com.example.recipesapp.models.Category
 import com.example.recipesapp.models.Recipe
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeView(navController: NavController) {
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
-    val categories = CategoryRepository.getAllCategories()
+    var categories by remember { mutableStateOf<List<Category>>(emptyList()) } // State para las categorías
+    var featuredRecipes by remember { mutableStateOf<List<Recipe>>(emptyList()) } // State para las recetas destacadas
+    var displayedRecipes by remember { mutableStateOf<List<Recipe>>(emptyList()) } // State para las recetas mostradas
 
-    // Cargar todas las recetas por defecto
-    val featuredRecipes = RecipeRepository.getAllRecipes().sortedByDescending { it.getAverageRating() }
+    // DrawerState para controlar el estado del Drawer
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-    // Inicializar las recetas mostradas con la categoría destacada (todas las recetas ordenadas por calificación)
-    var displayedRecipes by remember { mutableStateOf(featuredRecipes) }
+    // Usamos LaunchedEffect para cargar categorías y recetas
+    LaunchedEffect(Unit) {
+        categories = CategoryRepository.getAllCategories()
+        featuredRecipes = RecipeRepository.getAllRecipes().sortedByDescending { it.getAverageRating() }
+        displayedRecipes = featuredRecipes // Inicialmente mostrar todas las recetas ordenadas por calificación
+    }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Home") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White
-                )
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp)
-            ) {
-                // LazyRow para mostrar las categorías
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    item {
-                        // Agregar la categoría destacada (todas las recetas)
-                        CategoryItem(
-                            category = Category(0, "Destacado", Icons.Filled.Star),
-                            isSelected = selectedCategory?.id == 0,
-                            onClick = {
-                                selectedCategory = null // Ninguna categoría seleccionada
-                                displayedRecipes = featuredRecipes // Mostrar todas las recetas ordenadas por calificación
+    // Si cambia la categoría seleccionada, cargar las recetas correspondientes
+    LaunchedEffect(selectedCategory) {
+        if (selectedCategory == null) {
+            displayedRecipes = featuredRecipes // Mostrar recetas destacadas si no hay categoría seleccionada
+        } else {
+            displayedRecipes = RecipeRepository.getRecipesByCategory(selectedCategory!!.id)
+        }
+    }
+
+    // Contenido del Drawer
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Menú",
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                    HorizontalDivider()
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Perfil",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier
+                            .clickable {
+                                scope.launch {
+                                    drawerState.close() // Cerrar el drawer
+                                    navController.navigate("editProfile") // Navegar a la vista de edición de perfil
+                                }
                             }
-                        )
-                    }
+                            .padding(16.dp)
+                    )
 
-                    // Mostrar las categorías disponibles
-                    items(categories.size) { index ->
-                        val category = categories[index]
-                        CategoryItem(
-                            category = category,
-                            isSelected = selectedCategory?.id == category.id,
-                            onClick = {
-                                selectedCategory = category
-                                displayedRecipes = RecipeRepository.getRecipesByCategory(category.id)
-                            }
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // LazyColumn para mostrar las recetas
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(displayedRecipes.size) { index ->
-                        val recipe = displayedRecipes[index]
-                        RecipeItem(recipe = recipe)
-                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
+        },
+        content = {
+            // Contenido principal de la HomeView
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text("Home") },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                scope.launch {
+                                    drawerState.open() // Abrir el drawer al hacer clic en el ícono de menú
+                                }
+                            }) {
+                                Icon(Icons.Default.Menu, contentDescription = "Menú")
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            titleContentColor = Color.White
+                        )
+                    )
+                },
+                content = { paddingValues ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .padding(16.dp)
+                    ) {
+                        // LazyRow para mostrar las categorías
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            item {
+                                // Agregar la categoría destacada (todas las recetas)
+                                CategoryItem(
+                                    category = Category(0, "Destacado", Icons.Filled.Star),
+                                    isSelected = selectedCategory?.id == 0,
+                                    onClick = {
+                                        selectedCategory = null // Establecer a null para mostrar recetas destacadas
+                                    }
+                                )
+                            }
+
+                            // Mostrar las categorías disponibles cuando se carguen
+                            items(categories.size) { index ->
+                                val category = categories[index]
+                                CategoryItem(
+                                    category = category,
+                                    isSelected = selectedCategory?.id == category.id,
+                                    onClick = {
+                                        selectedCategory = category // Actualizar la categoría seleccionada
+                                    }
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // LazyColumn para mostrar las recetas
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(displayedRecipes.size) { index ->
+                                val recipe = displayedRecipes[index]
+                                RecipeItem(recipe = recipe)
+                            }
+                        }
+                    }
+                }
+            )
         }
     )
 }
+
 
 @Composable
 fun CategoryItem(category: Category, isSelected: Boolean, onClick: () -> Unit) {
@@ -108,7 +171,7 @@ fun CategoryItem(category: Category, isSelected: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .clickable(onClick = onClick)
             .padding(4.dp),
-        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer, // Color más claro cuando no está seleccionado
+        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
         shape = RoundedCornerShape(8.dp)
     ) {
         Row(
@@ -130,6 +193,7 @@ fun CategoryItem(category: Category, isSelected: Boolean, onClick: () -> Unit) {
     }
 }
 
+
 @Composable
 fun RecipeItem(recipe: Recipe) {
     Card(
@@ -137,7 +201,7 @@ fun RecipeItem(recipe: Recipe) {
             .fillMaxWidth()
             .padding(8.dp),
         shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant) // Color diferenciado para recetas
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -165,7 +229,11 @@ fun RecipeItem(recipe: Recipe) {
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = recipe.description, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
+                Text(
+                    text = recipe.description,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
             }
 
             // Calificación de la receta en la esquina superior derecha
@@ -181,3 +249,4 @@ fun RecipeItem(recipe: Recipe) {
         }
     }
 }
+

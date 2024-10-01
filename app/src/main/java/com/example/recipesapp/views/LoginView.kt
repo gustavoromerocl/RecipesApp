@@ -1,5 +1,6 @@
 package com.example.recipesapp.views
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,7 +10,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -29,14 +29,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.recipesapp.data.UserRepository
 import com.example.recipesapp.R
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginView(navController: NavController) {
+fun LoginView(navController: NavController, context: Context) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -57,13 +59,14 @@ fun LoginView(navController: NavController) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Imagen principal del login
                 Image(
                     painter = painterResource(id = R.drawable.login_icon),
                     contentDescription = "App Logo",
-                    modifier = Modifier.size(150.dp)
+                    modifier = Modifier.size(150.dp).padding(bottom = 16.dp)
                 )
 
-
+                // Formulario de inicio de sesión (email y password)
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -93,6 +96,7 @@ fun LoginView(navController: NavController) {
                     singleLine = true
                 )
 
+                // Mostrar error si lo hay
                 errorMessage?.let { error ->
                     Text(
                         text = error,
@@ -101,47 +105,60 @@ fun LoginView(navController: NavController) {
                     )
                 }
 
+                // Indicador de carga
                 if (isLoading) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
-                } else {
-                    Button(
-                        onClick = {
+                }
+
+                // Iniciar sesión
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
                             isLoading = true
                             val isValid = UserRepository.validateUser(email, password)
                             if (isValid) {
-                                navController.navigate("home")
+                                // Obtener el usuario desde Firestore para guardar su nombre real en la sesión
+                                val user = UserRepository.getUserByEmail(email)
+                                if (user != null) {
+                                    // Guardar sesión con el nombre de usuario correcto
+                                    SessionManager.saveUserSession(context, user.email, user.username)
+                                    navController.navigate("home")
+                                } else {
+                                    errorMessage = "Error al obtener la información del usuario."
+                                }
                             } else {
                                 errorMessage = "Correo o contraseña inválidos."
                             }
                             isLoading = false
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text(text = "Iniciar sesión", fontSize = 18.sp)
-                    }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(text = "Iniciar sesión", fontSize = 18.sp)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Enlaces para registro y recuperación de contraseña
                 Text(
                     text = "¿No tienes una cuenta? Registrate aquí.",
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .padding(bottom = 8.dp)
-                        .clickable {
-                            navController.navigate("signIn")
-                        }
+                    modifier = Modifier.clickable {
+                        navController.navigate("signIn")
+                    }
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = "¿Olvidaste tu contraseña?",
@@ -154,3 +171,4 @@ fun LoginView(navController: NavController) {
         }
     )
 }
+

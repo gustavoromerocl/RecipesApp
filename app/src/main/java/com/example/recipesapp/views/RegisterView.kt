@@ -33,6 +33,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.painterResource
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +44,7 @@ fun RegisterView(navController: NavController) {
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope() // Crear un scope para las coroutines
 
     Scaffold(
         topBar = {
@@ -148,20 +150,26 @@ fun RegisterView(navController: NavController) {
                 } else {
                     Button(
                         onClick = {
-                            isLoading = true
-                            errorMessage = when {
-                                username.isBlank() || email.isBlank() || password.isBlank() -> "Todos los campos son requeridos."
-                                password != confirmPassword -> "Las contraseñas no coinciden."
-                                UserRepository.getAllUsers().any { it.username == username } -> "El nombre de usuario ya existe."
-                                UserRepository.getAllUsers().any { it.email == email } -> "El correo electrónico ya existe"
-                                else -> null
-                            }
+                            coroutineScope.launch {
+                                isLoading = true
 
-                            if (errorMessage == null) {
-                                UserRepository.addUser(username, email, password)
-                                navController.navigate("login")
+                                val allUsers = UserRepository.getAllUsers() // Llamada suspendida en coroutine
+
+                                errorMessage = when {
+                                    username.isBlank() || email.isBlank() || password.isBlank() -> "Todos los campos son requeridos."
+                                    password != confirmPassword -> "Las contraseñas no coinciden."
+                                    allUsers.any { it.username == username } -> "El nombre de usuario ya existe."
+                                    allUsers.any { it.email == email } -> "El correo electrónico ya existe."
+                                    else -> null
+                                }
+
+                                if (errorMessage == null) {
+                                    UserRepository.addUser(username, email, password) // Llamada suspendida en coroutine
+                                    navController.navigate("login")
+                                }
+
+                                isLoading = false
                             }
-                            isLoading = false
                         },
                         modifier = Modifier
                             .fillMaxWidth()
