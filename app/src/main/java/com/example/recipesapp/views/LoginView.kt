@@ -61,7 +61,7 @@ fun LoginView(navController: NavController, context: Context) {
             ) {
                 // Imagen principal del login
                 Image(
-                    painter = painterResource(id = R.drawable.login_icon),  // Reemplaza 'login_icon' por el nombre de tu recurso drawable
+                    painter = painterResource(id = R.drawable.login_icon),
                     contentDescription = "App Logo",
                     modifier = Modifier.size(150.dp).padding(bottom = 16.dp)
                 )
