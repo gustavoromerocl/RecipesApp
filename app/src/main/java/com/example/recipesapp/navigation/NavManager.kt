@@ -1,12 +1,12 @@
 package com.example.navegacion.navigation
 
+import EditProfileView
 import SessionManager
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.recipesapp.views.EditProfileView
 import com.example.recipesapp.views.HomeView
 import com.example.recipesapp.views.LoginView
 import com.example.recipesapp.views.PasswordRecoveryView
@@ -31,7 +31,9 @@ fun NavManager(){
         }
 
         composable("home"){
-            HomeView(navController)
+            val context = LocalContext.current
+            val (email, username) = SessionManager.getUserSession(context)
+            HomeView(navController, usernameFromSession = username ?: "")
         }
 
         // Ruta para la vista de edición de perfil

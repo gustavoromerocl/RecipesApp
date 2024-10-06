@@ -14,6 +14,13 @@ object SessionManager {
         editor.apply()
     }
 
+    fun updateUsernameInSession(context: Context, newUsername: String) {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString(KEY_USERNAME, newUsername)
+        editor.apply()
+    }
+
     fun getUserSession(context: Context): Pair<String?, String?> {
         val sharedPreferences: SharedPreferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
         val email = sharedPreferences.getString(KEY_EMAIL, null)

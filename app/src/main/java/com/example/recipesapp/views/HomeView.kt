@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeView(navController: NavController) {
+fun HomeView(navController: NavController, usernameFromSession: String) {
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
     var categories by remember { mutableStateOf<List<Category>>(emptyList()) } // State para las categorías
     var featuredRecipes by remember { mutableStateOf<List<Recipe>>(emptyList()) } // State para las recetas destacadas
@@ -93,7 +93,7 @@ fun HomeView(navController: NavController) {
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text("Home") },
+                        title = { Text("Bienvenid@ $usernameFromSession") },
                         navigationIcon = {
                             IconButton(onClick = {
                                 scope.launch {
