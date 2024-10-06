@@ -84,13 +84,10 @@ dependencies {
     implementation(libs.coil)
     // JUnit para pruebas unitarias
     testImplementation(libs.junit)
-
     // Mockito para mocks
     testImplementation(libs.mockito.core)
-
     // Coroutine test para pruebas con coroutines
     testImplementation(libs.kotlinx.coroutines.test)
-
     testImplementation(libs.mockito.kotlin)
 }
 
